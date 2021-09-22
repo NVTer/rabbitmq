@@ -19,7 +19,7 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) SendMessage(from, to, msg, ID, body string) error {
+func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
 	queue := to + "." + msg
 	replyTo := from + "." + msg
 	return c.channel.Publish("", queue, false, false, amqp.Publishing{
@@ -27,7 +27,7 @@ func (c *Client) SendMessage(from, to, msg, ID, body string) error {
 		Type:          msg,
 		CorrelationId: ID,
 		ReplyTo:       replyTo,
-		Body:          []byte(body),
+		Body:          body,
 	})
 }
 
