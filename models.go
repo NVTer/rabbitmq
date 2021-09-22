@@ -9,8 +9,9 @@ type (
 	}
 
 	Client struct {
-		name    string
-		channel *amqp.Channel
+		name       string
+		connection *amqp.Connection
+		channel    *amqp.Channel
 	}
 	Message struct {
 		text   string

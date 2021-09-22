@@ -16,6 +16,6 @@ func (m *Message) GetID() string {
 	return m.id
 }
 
-func (m *Message) GetSender() string{
+func (m *Message) GetSender() string {
 	return m.sender
 }

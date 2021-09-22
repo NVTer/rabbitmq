@@ -14,8 +14,9 @@ func NewClient(serviceName, URL string) (*Client, error) {
 		return nil, err
 	}
 	return &Client{
-		name:    serviceName,
-		channel: channel,
+		name:       serviceName,
+		connection: connect,
+		channel:    channel,
 	}, nil
 }
 
