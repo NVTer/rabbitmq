@@ -45,7 +45,7 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewMessage((<-messages).Type, (<-messages).CorrelationId, (<-messages).Body), nil
+	return NewMessage((<-messages).Type, (<-messages).CorrelationId, (<-messages).ReplyTo, (<-messages).Body), nil
 }
 
 func (c *Client) CreateQueue(message string, isResponse bool) error {

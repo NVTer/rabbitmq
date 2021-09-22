@@ -13,8 +13,9 @@ type (
 		channel *amqp.Channel
 	}
 	Message struct {
-		text string
-		id   string
-		body []byte
+		text   string
+		id     string
+		body   []byte
+		sender string
 	}
 )
