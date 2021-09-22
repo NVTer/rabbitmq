@@ -48,12 +48,12 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	return NewMessage((<-messages).Type, (<-messages).CorrelationId, (<-messages).Body), nil
 }
 
-func (c *Client) CreateQueue(message string, isResponse bool) (amqp.Queue, error) {
+func (c *Client) CreateQueue(message string, isResponse bool) error {
 	queueName := c.name + "." + message
 	if isResponse {
 		queueName += ".get_response"
 	}
-	return c.channel.QueueDeclare(
+	_, err := c.channel.QueueDeclare(
 		queueName,
 		true,
 		false,
@@ -61,4 +61,5 @@ func (c *Client) CreateQueue(message string, isResponse bool) (amqp.Queue, error
 		false,
 		nil,
 	)
+	return err
 }
