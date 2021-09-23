@@ -4,7 +4,17 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func NewClient(serviceName, URL string) (*Client, error) {
+func (c *Client) initQueues(queues []string) error {
+	for _, queue := range queues {
+		err := c.CreateQueue(queue)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func NewClient(serviceName, URL string, queues []string) (*Client, error) {
 	config, err := newConfig()
 	if err != nil {
 		return nil, err
@@ -17,12 +27,17 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{
+	var client = &Client{
 		name:       serviceName,
 		connection: connect,
 		channel:    channel,
 		config:     config,
-	}, nil
+	}
+	err = client.initQueues(queues)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
@@ -55,11 +70,8 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	return NewMessage(m.Type, m.CorrelationId, m.ReplyTo, m.Body), nil
 }
 
-func (c *Client) CreateQueue(message string, isResponse bool) error {
-	queueName := c.name + "." + message
-	if isResponse {
-		queueName += ".get_response"
-	}
+func (c *Client) CreateQueue(name string) error {
+	queueName := c.name + "." + name
 	_, err := c.channel.QueueDeclare(
 		queueName,
 		c.config.Queue.Durable,
