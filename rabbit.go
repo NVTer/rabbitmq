@@ -34,7 +34,7 @@ func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
 
 func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	queue := c.name + "." + msg
-	messages, err := c.channel.Consume(
+	message, err := c.channel.Consume(
 		queue,
 		"",
 		true,
@@ -46,7 +46,7 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := <-messages
+	m := <-message
 	return NewMessage(m.Type, m.CorrelationId, m.ReplyTo, m.Body), nil
 }
 
