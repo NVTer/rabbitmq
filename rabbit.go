@@ -27,7 +27,7 @@ func NewClient(serviceName, URL string) (*Client, error) {
 
 func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
 	queue := to + "." + msg
-	replyTo := from + "." + msg
+	replyTo := from + "." + msg + "_response"
 	return c.channel.Publish("", queue, c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
 		Type:          msg,
@@ -55,11 +55,8 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	return NewMessage(m.Type, m.CorrelationId, m.ReplyTo, m.Body), nil
 }
 
-func (c *Client) CreateQueue(message string, isResponse bool) error {
+func (c *Client) CreateQueue(message string) error {
 	queueName := c.name + "." + message
-	if isResponse {
-		queueName += ".get_response"
-	}
 	_, err := c.channel.QueueDeclare(
 		queueName,
 		c.config.Queue.Durable,
