@@ -10,6 +10,7 @@ type (
 
 	Client struct {
 		name       string
+		config     *config
 		connection *amqp.Connection
 		channel    *amqp.Channel
 	}

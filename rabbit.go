@@ -5,6 +5,10 @@ import (
 )
 
 func NewClient(serviceName, URL string) (*Client, error) {
+	config, err := newConfig()
+	if err != nil {
+		return nil, err
+	}
 	connect, err := amqp.Dial(URL)
 	if err != nil {
 		return nil, err
@@ -17,13 +21,14 @@ func NewClient(serviceName, URL string) (*Client, error) {
 		name:       serviceName,
 		connection: connect,
 		channel:    channel,
+		config:     config,
 	}, nil
 }
 
 func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
 	queue := to + "." + msg
 	replyTo := from + "." + msg
-	return c.channel.Publish("", queue, false, false, amqp.Publishing{
+	return c.channel.Publish("", queue, c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
 		Type:          msg,
 		CorrelationId: ID,
@@ -37,10 +42,10 @@ func (c *Client) ReceiveMessage(msg string) (*Message, error) {
 	message, err := c.channel.Consume(
 		queue,
 		"",
-		true,
-		false,
-		false,
-		false,
+		c.config.Channel.AutoAck,
+		c.config.Channel.Exclusive,
+		c.config.Channel.NoLocal,
+		c.config.Channel.NoWait,
 		nil,
 	)
 	if err != nil {
@@ -57,10 +62,10 @@ func (c *Client) CreateQueue(message string, isResponse bool) error {
 	}
 	_, err := c.channel.QueueDeclare(
 		queueName,
-		true,
-		false,
-		true,
-		false,
+		c.config.Queue.Durable,
+		c.config.Queue.AutoDel,
+		c.config.Queue.Exclusive,
+		c.config.Queue.NoWait,
 		nil,
 	)
 	return err
