@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -32,13 +31,9 @@ type Publish struct {
 }
 
 func newConfig() (*config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, err
 	}
