@@ -33,14 +33,14 @@ func (c *Client) Send(ID string, body []byte) error {
 	})
 }
 
-func (c *Client) SendWithReply(msg, ID string, body []byte) error {
+func (c *Client) SendWithReply(msg, ID string, body []byte) (string, error) {
 	msgResponse :=msg +"_response"
 	replyTo := c.name + "." + msgResponse
 	err := c.CreateQueue(msgResponse)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+	return replyTo, c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
 		Type:          msg,
 		CorrelationId: ID,
