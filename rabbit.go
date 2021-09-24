@@ -65,6 +65,7 @@ func (c *Client) ReceiveMessage(queue string) (chan *Message, error) {
 	m := make(chan *Message)
 	for msg := range messages {
 		 m<-NewMessage(msg.Type, msg.CorrelationId, msg.ReplyTo, msg.Body)
+		break
 	}
 	return m, nil
 }
