@@ -7,7 +7,6 @@ type (
 		SendMessage(from, to, msg, ID, body string) error
 		ReceiveMessage(msg string) (string, string, error)
 	}
-
 	Client struct {
 		name       string
 		config     *config

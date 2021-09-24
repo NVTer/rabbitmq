@@ -31,13 +31,13 @@ type Publish struct {
 	Immediate   bool `mapstructure:"immediate"`
 }
 
-func newConfig() (*config, error) {
+func newConfig(configFilePath string) (*config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
 	viper.AddConfigPath(".")
-	viper.SetConfigName("config")
+	viper.SetConfigName(configFilePath)
 	err = viper.ReadInConfig()
 	if err != nil {
 		return nil, err
