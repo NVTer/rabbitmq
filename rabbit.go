@@ -25,31 +25,25 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Send(ID string, body []byte) error {
-	return c.channel.Publish("", "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
-		ContentType:   "application/json",
-		CorrelationId: ID,
-		Body:          body,
-	})
-}
-
-func (c *Client) SendWithReply(msg, ID string, body []byte) (string, error) {
-	msgResponse :=msg +"_response"
-	replyTo := c.name + "." + msgResponse
-	err := c.CreateQueue(msgResponse)
-	if err != nil {
-		return "", err
+func (c *Client) SendMessage(msgType, ID string, body []byte, isResponse bool) error {
+	var replyTo string
+	if isResponse {
+		replyTo = c.name + "." + msgType + "_response"
 	}
-	return replyTo, c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+	return c.channel.Publish(msgType, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
-		Type:          msg,
+		Type:          msgType,
 		CorrelationId: ID,
 		ReplyTo:       replyTo,
 		Body:          body,
 	})
 }
 
-func (c *Client) ReceiveMessage(queue string) (chan *Message, error) {
+func (c *Client) startConsumer(msgType string, msgChannel chan Message, isResponse bool) error {
+	queue := c.name + "." + msgType
+	if isResponse {
+		queue = queue + "_response"
+	}
 	messages, err := c.channel.Consume(
 		queue,
 		"",
@@ -60,18 +54,12 @@ func (c *Client) ReceiveMessage(queue string) (chan *Message, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	m := make(chan *Message)
-	for msg := range messages {
-		 m<-NewMessage(msg.Type, msg.CorrelationId, msg.ReplyTo, msg.Body)
-		break
+	for msg := range messages{
+		msgChannel <- NewMessage(msg.Type, msg.CorrelationId, msg.ReplyTo, msg.Body)
 	}
-	return m, nil
-}
-
-func (c *Client) receive(){
-	return
+	return nil
 }
 
 func (c *Client) CreateQueue(message string) error {
