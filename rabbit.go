@@ -25,16 +25,22 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) SendMessage(msgType, ID string, body []byte, isResponse bool) error {
-	var replyTo string
-	if isResponse {
-		replyTo = c.name + "." + msgType + "_response"
-	}
+func (c *Client) SendMessage(msgType, corrID string, body []byte) error {
+	replyTo := c.name + "." + msgType + "_response"
 	return c.channel.Publish(msgType, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
 		Type:          msgType,
-		CorrelationId: ID,
+		CorrelationId: corrID,
 		ReplyTo:       replyTo,
+		Body:          body,
+	})
+}
+
+func (c *Client) SendReply(consumer, msgType, corrID string, body []byte) error {
+	return c.channel.Publish("", consumer, c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+		ContentType:   "application/json",
+		Type:          msgType,
+		CorrelationId: corrID,
 		Body:          body,
 	})
 }
