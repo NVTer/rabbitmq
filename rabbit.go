@@ -4,8 +4,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func NewClient(serviceName, configFilePath, URL string) (*Client, error) {
-	config, err := newConfig(configFilePath)
+func NewClient(serviceName, URL string) (*Client, error) {
+	config, err := newConfig()
 	if err != nil {
 		return nil, err
 	}
