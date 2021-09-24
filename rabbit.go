@@ -35,8 +35,9 @@ func (c *Client) Send(msg, ID string, body []byte) error {
 }
 
 func (c *Client) SendWithReply(msg, ID string, body []byte) error {
-	replyTo := c.name + "." + msg + "_response"
-	err := c.CreateQueue(replyTo)
+	msg+="_response"
+	replyTo := c.name + "." + msg
+	err := c.CreateQueue(msg)
 	if err != nil {
 		return err
 	}
