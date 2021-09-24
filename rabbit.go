@@ -25,10 +25,22 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
-	queue := to + "." + msg
-	replyTo := from + "." + msg + "_response"
-	return c.channel.Publish("", queue, c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+func (c *Client) Send(msg, ID string, body []byte) error {
+	return c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+		ContentType:   "application/json",
+		Type:          msg,
+		CorrelationId: ID,
+		Body:          body,
+	})
+}
+
+func (c *Client) SendWithReply(msg, ID string, body []byte) error {
+	replyTo := c.name + "." + msg + "_response"
+	err := c.CreateQueue(replyTo)
+	if err != nil {
+		return err
+	}
+	return c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
 		Type:          msg,
 		CorrelationId: ID,
@@ -37,10 +49,9 @@ func (c *Client) SendMessage(from, to, msg, ID string, body []byte) error {
 	})
 }
 
-func (c *Client) ReceiveMessage(msg string) (*Message, error) {
-	queue := c.name + "." + msg
+func (c *Client) ReceiveMessage(replyQueue string) (*Message, error) {
 	message, err := c.channel.Consume(
-		queue,
+		replyQueue,
 		"",
 		c.config.Channel.AutoAck,
 		c.config.Channel.Exclusive,
@@ -65,5 +76,12 @@ func (c *Client) CreateQueue(message string) error {
 		c.config.Queue.NoWait,
 		nil,
 	)
+	if err != nil {
+		return err
+	}
+	err = c.channel.QueueBind(queueName, "", message, c.config.Queue.NoWait, nil)
+	if err != nil {
+		return err
+	}
 	return err
 }

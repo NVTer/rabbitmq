@@ -1,7 +1,7 @@
 package rabbitmq
 
 func NewMessage(text, ID, sender string, body []byte) *Message {
-	return &Message{text: text, id: ID, body: body, sender: sender}
+	return &Message{text: text, id: ID, body: body, replyTo: sender}
 }
 
 func (m *Message) GetText() string {
@@ -16,6 +16,6 @@ func (m *Message) GetID() string {
 	return m.id
 }
 
-func (m *Message) GetSender() string {
-	return m.sender
+func (m *Message) GetReplyTo() string {
+	return m.replyTo
 }

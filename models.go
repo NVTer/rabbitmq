@@ -17,7 +17,7 @@ type (
 	Message struct {
 		text   string
 		id     string
-		body   []byte
-		sender string
+		body    []byte
+		replyTo string
 	}
 )
