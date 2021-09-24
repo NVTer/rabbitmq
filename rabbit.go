@@ -62,8 +62,11 @@ func (c *Client) startConsumer(msgType string, msgChannel chan Message, isRespon
 	return nil
 }
 
-func (c *Client) CreateQueue(message string) error {
+func (c *Client) CreateQueue(message string, isResponse bool) error {
 	queueName := c.name + "." + message
+	if isResponse {
+		queueName = queueName + "_response"
+	}
 	_, err := c.channel.QueueDeclare(
 		queueName,
 		c.config.Queue.Durable,
