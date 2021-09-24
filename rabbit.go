@@ -25,19 +25,18 @@ func NewClient(serviceName, URL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Send(msg, ID string, body []byte) error {
-	return c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+func (c *Client) Send(ID string, body []byte) error {
+	return c.channel.Publish("", "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
-		Type:          msg,
 		CorrelationId: ID,
 		Body:          body,
 	})
 }
 
 func (c *Client) SendWithReply(msg, ID string, body []byte) error {
-	msg+="_response"
-	replyTo := c.name + "." + msg
-	err := c.CreateQueue(msg)
+	msgResponse :=msg +"_response"
+	replyTo := c.name + "." + msgResponse
+	err := c.CreateQueue(msgResponse)
 	if err != nil {
 		return err
 	}
@@ -50,9 +49,9 @@ func (c *Client) SendWithReply(msg, ID string, body []byte) error {
 	})
 }
 
-func (c *Client) ReceiveMessage(replyQueue string) (*Message, error) {
+func (c *Client) ReceiveMessage(queue string) (*Message, error) {
 	message, err := c.channel.Consume(
-		replyQueue,
+		queue,
 		"",
 		c.config.Channel.AutoAck,
 		c.config.Channel.Exclusive,
