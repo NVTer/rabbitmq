@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-	"os"
 )
 
 
@@ -37,8 +36,8 @@ func newConfig() (*config, error) {
 	if err != nil {
 		return nil, err
 	}
-	viper.AddConfigPath(os.Getenv("configPath"))
-	viper.SetConfigName(os.Getenv("configName"))
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
 	err = viper.ReadInConfig()
 	if err != nil {
 		return nil, err
