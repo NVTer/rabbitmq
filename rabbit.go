@@ -49,8 +49,8 @@ func (c *Client) SendWithReply(msg, ID string, body []byte) (string, error) {
 	})
 }
 
-func (c *Client) ReceiveMessage(queue string) (*Message, error) {
-	message, err := c.channel.Consume(
+func (c *Client) ReceiveMessage(queue string) (chan *Message, error) {
+	messages, err := c.channel.Consume(
 		queue,
 		"",
 		c.config.Channel.AutoAck,
@@ -62,8 +62,15 @@ func (c *Client) ReceiveMessage(queue string) (*Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	m := <-message
-	return NewMessage(m.Type, m.CorrelationId, m.ReplyTo, m.Body), nil
+	m := make(chan *Message)
+	for msg := range messages {
+		 m<-NewMessage(msg.Type, msg.CorrelationId, msg.ReplyTo, msg.Body)
+	}
+	return m, nil
+}
+
+func (c *Client) receive(){
+	return
 }
 
 func (c *Client) CreateQueue(message string) error {
