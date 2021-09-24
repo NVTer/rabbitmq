@@ -39,7 +39,7 @@ func (c *Client) SendMessage(msgType, ID string, body []byte, isResponse bool) e
 	})
 }
 
-func (c *Client) startConsumer(msgType string, msgChannel chan Message, isResponse bool) error {
+func (c *Client) StartConsumer(msgType string, msgChannel chan Message, isResponse bool) error {
 	queue := c.name + "." + msgType
 	if isResponse {
 		queue = queue + "_response"
