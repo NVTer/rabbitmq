@@ -11,3 +11,9 @@ channel:
 publish:
   mandatory: false
   immediate: false
+exchange:
+  type: "fanout"
+  durable: true
+  auto_delete: false
+  enternal: true
+  no_wait: false

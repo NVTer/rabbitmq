@@ -32,28 +32,28 @@ func NewRabbitMQConn(cfg *Config) string {
 	)
 }
 
-func (c *Client) SendMessage(msgType, corrID string, body []byte) error {
-	replyTo := c.name + "." + msgType + "_response"
-	return c.channel.Publish(msgType, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
+func (c *Client) SendMessage(msg, corrID string, body []byte) error {
+	replyTo := c.name + "." + msg + "_response"
+	return c.channel.Publish(msg, "", c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
-		Type:          msgType,
+		Type:          msg,
 		CorrelationId: corrID,
 		ReplyTo:       replyTo,
 		Body:          body,
 	})
 }
 
-func (c *Client) SendReply(consumer, msgType, corrID string, body []byte) error {
+func (c *Client) SendReply(consumer, msg, corrID string, body []byte) error {
 	return c.channel.Publish("", consumer, c.config.Mandatory, c.config.Immediate, amqp.Publishing{
 		ContentType:   "application/json",
-		Type:          msgType,
+		Type:          msg,
 		CorrelationId: corrID,
 		Body:          body,
 	})
 }
 
-func (c *Client) StartConsumer(msgType string, msgChannel chan Message, isResponse bool) error {
-	queue := c.name + "." + msgType
+func (c *Client) StartConsumer(msg string, msgChannel chan Message, isResponse bool) error {
+	queue := c.name + "." + msg
 	if isResponse {
 		queue = queue + "_response"
 	}
@@ -98,4 +98,14 @@ func (c *Client) CreateQueue(message string, isResponse bool) error {
 	return err
 }
 
-
+func (c *Client) CreateExchange(name string) error {
+	return c.channel.ExchangeDeclare(
+		name,
+		c.config.Exchange.Type,
+		c.config.Exchange.Durable,
+		c.config.Exchange.AutoDel,
+		c.config.Exchange.Internal,
+		c.config.Exchange.NoWait,
+		nil,
+	)
+}

@@ -6,16 +6,17 @@ type Config struct {
 }
 
 type RabbitMQ struct {
-	Host string `mapstructure:"host"`
-	Port string `mapstructure:"port"`
-	User string `mapstructure:"user"`
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 }
 
 type Delivery struct {
-	Queue `mapstructure:"queue"`
+	Queue    `mapstructure:"queue"`
 	Channel  `mapstructure:"channel"`
 	Publish  `mapstructure:"publish"`
+	Exchange `mapstructure:"exchange"`
 }
 
 type Queue struct {
@@ -33,6 +34,14 @@ type Channel struct {
 }
 
 type Publish struct {
-	Mandatory   bool `mapstructure:"mandatory"`
-	Immediate   bool `mapstructure:"immediate"`
+	Mandatory bool `mapstructure:"mandatory"`
+	Immediate bool `mapstructure:"immediate"`
+}
+
+type Exchange struct {
+	Type     string `mapstructure:"type"`
+	Durable  bool   `mapstructure:"durable"`
+	AutoDel  bool   `mapstructure:"auto_delete"`
+	Internal bool   `mapstructure:"internal"`
+	NoWait   bool   `mapstructure:"no_wait"`
 }
