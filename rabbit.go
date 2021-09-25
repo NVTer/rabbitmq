@@ -52,7 +52,7 @@ func (c *Client) SendReply(consumer, msg, corrID string, body []byte) error {
 	})
 }
 
-func (c *Client) StartConsumer(msg string, msgChannel chan Message, isResponse bool) error {
+func (c *Client) StartConsumer(msg string, msgChannel chan *Message, isResponse bool) error {
 	queue := c.name + "." + msg
 	if isResponse {
 		queue = queue + "_response"
