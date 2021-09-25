@@ -4,11 +4,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func NewClient(serviceName, URL string) (*Client, error) {
-	config, err := newConfig()
-	if err != nil {
-		return nil, err
-	}
+func NewClient(serviceName, URL string, config *Config) (*Client, error) {
 	connect, err := amqp.Dial(URL)
 	if err != nil {
 		return nil, err

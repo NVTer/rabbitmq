@@ -1,11 +1,6 @@
 package rabbitmq
 
-import (
-	"github.com/spf13/viper"
-)
-
-
-type config struct {
+type Config struct {
 	Queue `mapstructure:"queue"`
 	Channel  `mapstructure:"channel"`
 	Publish  `mapstructure:"publish"`
@@ -28,19 +23,4 @@ type Channel struct {
 type Publish struct {
 	Mandatory   bool `mapstructure:"mandatory"`
 	Immediate   bool `mapstructure:"immediate"`
-}
-
-func newConfig() (*config, error) {
-	viper.AddConfigPath(".")
-	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-	var serviceConfig config
-	err = viper.Unmarshal(&serviceConfig)
-	if err != nil {
-		return nil, err
-	}
-	return &serviceConfig, nil
 }
