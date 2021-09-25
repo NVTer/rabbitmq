@@ -1,11 +1,12 @@
 package rabbitmq
 
 import (
+	"fmt"
 	"github.com/streadway/amqp"
 )
 
-func NewClient(serviceName, URL string, config *Config) (*Client, error) {
-	connect, err := amqp.Dial(URL)
+func NewClient(serviceName string, config *Config) (*Client, error) {
+	connect, err := amqp.Dial(NewRabbitMQConn(config))
 	if err != nil {
 		return nil, err
 	}
@@ -19,6 +20,16 @@ func NewClient(serviceName, URL string, config *Config) (*Client, error) {
 		channel:    channel,
 		config:     config,
 	}, nil
+}
+
+func NewRabbitMQConn(cfg *Config) string {
+	return fmt.Sprintf(
+		"amqp://%s:%s@%s:%s/",
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+	)
 }
 
 func (c *Client) SendMessage(msgType, corrID string, body []byte) error {
@@ -86,3 +97,5 @@ func (c *Client) CreateQueue(message string, isResponse bool) error {
 	}
 	return err
 }
+
+
