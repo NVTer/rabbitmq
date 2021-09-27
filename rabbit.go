@@ -91,7 +91,9 @@ func (c *Client) CreateQueue(message string, isResponse bool) error {
 	if err != nil {
 		return err
 	}
-	err = c.channel.QueueBind(queueName, "", message, c.config.Queue.NoWait, nil)
+	if !isResponse {
+		err = c.channel.QueueBind(queueName, "", message, c.config.Queue.NoWait, nil)
+	}
 	if err != nil {
 		return err
 	}
