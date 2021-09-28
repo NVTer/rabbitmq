@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 	"github.com/streadway/amqp"
+	"time"
 )
 
 func NewClient(serviceName string, config *Config) (*Client, error) {
@@ -69,7 +70,7 @@ func (c *Client) StartConsumer(msg string, msgChannel chan *Message, isResponse 
 	if err != nil {
 		return err
 	}
-	for msg := range messages{
+	for msg := range messages {
 		msgChannel <- NewMessage(msg.Type, msg.CorrelationId, msg.ReplyTo, msg.Body)
 	}
 	return nil
@@ -110,4 +111,14 @@ func (c *Client) CreateExchange(name string) error {
 		c.config.Exchange.NoWait,
 		nil,
 	)
+}
+
+func (c *Client) Ping() error {
+	notify := c.channel.NotifyClose(make(chan *amqp.Error))
+	select {
+	case err := <-notify:
+		return err
+	case <-time.After(5 * time.Second):
+		return nil
+	}
 }
